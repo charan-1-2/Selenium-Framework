@@ -1,8 +1,11 @@
 import pytest
 from selenium.webdriver import Chrome
 from selenium.webdriver import Firefox
+from selenium.webdriver import Remote
 from selenium.webdriver.support.wait import WebDriverWait
 from pyjavaproperties import Properties
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 class BaseTest:
 
@@ -11,17 +14,31 @@ class BaseTest:
         print('Reading config.properties')
         p = Properties()
         p.load(open('../config.properties'))
+        grid=p['GRID']
+        grid_url=p['GRID_URL']
         browser=p['BROWSER']
         app_url=p['APP_URL']
         ito=p['ITO']
         eto=p['ETO']
 
-        if browser.lower()=='firefox':
-            print('Open the Firefox Browser')
-            self.driver=Firefox()
+        if grid.lower()=='yes':
+            print('Using Grid')
+            if browser.lower()=='firefox':
+                print('Open the Firefox Browser')
+                options=FirefoxOptions()
+            else:
+                print('Open the Chrome Browser')
+                options = ChromeOptions()
+
+            self.driver = Remote(command_executor=grid_url, options=options)
         else:
-            print('Open the Chrome Browser')
-            self.driver=Chrome()
+            print('Using Local System')
+            if browser.lower()=='firefox':
+                print('Open the Firefox Browser')
+                self.driver=Firefox()
+            else:
+                print('Open the Chrome Browser')
+                self.driver=Chrome()
 
         print('Enter the url',app_url)
         self.driver.get(app_url)
